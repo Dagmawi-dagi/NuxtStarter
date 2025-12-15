@@ -6,12 +6,6 @@ export default defineNitroPlugin(async (nitroApp) => {
      const models = {
        test: modelsRefs.test.model,
        user: modelsRefs.user.model,
-       
-       blog: modelsRefs.blog.model,
-       newsletter: modelsRefs.newsletter.model,
-       newsletterSub: modelsRefs.newsletterSub.model,
-       vacancy: modelsRefs.vacancy.model,
-       vacancyApplication: modelsRefs.vacancyApplication.model,
      };
 
      // Initialize associations
