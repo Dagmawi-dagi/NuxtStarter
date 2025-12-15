@@ -1,0 +1,379 @@
+@use "@/assets/style/variables" as *;;
+@use "@/assets/style/mixins" as *;
+
+.wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+}
+
+
+.main-container {
+    display: grid;
+    grid-template-columns: 1fr 250px;
+    gap: 2rem;
+    justify-content: center;
+    min-width: fit-content;
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Main content */
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    position: sticky;
+    top: 100px; /* Adjust this value to control when it sticks */
+    height: fit-content; /* Viewport height minus top and bottom padding */
+    overflow-y: auto; /* Make it scrollable if content is too tall */
+}
+
+
+// -------------feature
+
+.features {
+    max-width: 1200px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin: 6rem auto;
+}
+
+.feature {
+    flex: 1;
+    min-width: 300px;
+    text-align: center;
+    padding: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.feature:hover {
+    transform: translateY(-5px);
+}
+
+/* Icon styles */
+.icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1.5rem;
+}
+
+/* Text styles */
+.feature h3 {
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.feature p {
+    display: inline-block;
+    max-width: 400px;
+    text-align: center;
+    font-size: 15px;
+    color: #666;
+    line-height: 1.6;
+}
+
+
+.distillery-icon {
+    fill: #2c3e8f;
+}
+
+.flavor-icon {
+    fill: #4a6fa5;
+}
+
+
+.blogcard :deep(.m-gallery__item__image){
+    background-color: #9999996c !important;
+}
+
+.blogcard :deep(.m-gallery){
+    border-radius: 7px;
+}
+
+.card__link {
+  display: flex;
+  align-items: center;
+  color: #111;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  margin: 1rem 0;
+  
+  &:hover {
+    color: #ff4500;
+    
+    .arrow {
+      transform: translateX(4px);
+    }
+  }
+  
+  .arrow {
+    margin-left: 6px;
+    transition: transform 0.2s ease;
+  }
+}
+    
+
+.profile-card {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 30px 0px;
+    margin: 2rem auto;
+    gap: 2rem;
+
+    @media (max-width: 900px) {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        display: flex;
+    }
+}
+
+.profile-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+    gap:1rem;
+}
+
+.profile-right{
+    text-align: justify;
+    hyphens: auto;
+
+    @media (max-width: 600px) { 
+        text-align: left; /* or right/center if fits your design */
+    }
+}
+
+.profile-image {
+    max-width: 100%;
+    max-height: 400px;
+    height: auto;
+    border-radius: 10%;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.profile-container{
+    display: flex;
+    flex-direction: column;
+    margin-right: auto;
+    gap:1rem
+}
+
+.profile-name {
+    font-weight: 500;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.profile-title {
+    color: #666;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.profile-quote {
+    font-style: italic;
+    color: #333;
+    font-weight: bold;
+    padding-left: 15px;
+    border-left: 3px solid lightseagreen;
+    quotes: "“ " " ”" "‘" "’";
+}
+
+blockquote {
+  color: #333;
+  quotes: "“" "”" "‘" "’";
+}
+
+blockquote::before {
+  content: open-quote;
+  font-size:1.2rem;
+}
+
+blockquote::after {
+  content: close-quote;
+  font-size:1.2rem;
+}
+
+.profile-bio {
+    color: #333;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+//-------------- end of profile card
+
+
+
+/* Brand info section */
+.brand-info {
+    grid-area: brand-info;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-self: self-start;
+    .brand-name {
+        font-weight: 700;
+        color: #1a365d;
+        line-height: 1;
+    }
+    
+    .brand-tagline {
+        font-size: 16px;
+        letter-spacing: 2px;
+        color: #1a365d;
+        margin-top: 5px;
+    }
+
+   .header {
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 1.2;
+        margin-bottom: 10px;
+        margin-top: 30px;
+    }
+}
+
+/* Product image section */
+.product-image {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    @media (max-width: 900px) {
+        flex-direction: row;
+        flex-wrap: wrap;    
+        justify-content: center;
+    }
+}
+
+.img-container{
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle at 50% 50%, #3998d3, #152a4a 200%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 7px;
+    cursor: pointer;
+    // Dots pattern
+    .dots-pattern {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle, $text-blue, 1px, transparent 1px);
+        background-size: 16px 16px;
+        opacity: .15;
+        pointer-events: none;
+    }
+    img{
+        max-height: 85%;
+        filter: drop-shadow(0px 9px 6px black);
+    }
+}
+
+
+.bottle {
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+
+.section-label {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.section-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    line-height: 1.2;
+    color: #000;
+}
+
+.section-text {
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 30px;
+    text-align: justify;
+    line-height: 1.6;
+     hyphens: auto;
+    p{
+        margin-top: 10px;
+    }
+    @media (max-width: 600px) { 
+        text-align: left; /* or right/center if fits your design */
+    }
+}
+.custom-list {
+  list-style: none;
+  padding-left: 3rem;
+  max-width: 600px;
+
+}
+
+.custom-list li::before {
+  content: "✔";
+  margin-right: 8px;
+  margin-left: -18px;
+}
+
+
+/* Responsive styles */
+@media (max-width: 992px) {
+    .brand-info {
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .section-text {
+        max-width: 100%;
+        text-align: justify;
+    }
+}
+
+@media (max-width: 600px) {
+    .section-text {
+        text-align: left; /* or right/center if fits your design */
+    }
+}
+
+@media (max-width: 576px) {
+    .section-title {
+        font-size: 24px;
+    }
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+    .features {
+        flex-direction: column;
+    }
+
+    .feature {
+        max-width: 100%;
+    }
+}
