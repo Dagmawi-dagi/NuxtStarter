@@ -1,0 +1,165 @@
+import { DataTypes } from 'sequelize';
+import  sequelize  from '../../database/sequelizeConnection';
+import { z } from 'zod';
+import Email from '../../utils/email';
+
+const _schema = {
+  id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
+  subject: { type:  DataTypes.STRING, allowNull: false },
+  content: { type: DataTypes.TEXT, allowNull: false },
+  createdBy:{ type:  DataTypes.INTEGER, allowNull: true }, // allowNull: true since midllere ware will be if Just pass let Joi validator
+  recipientsIds:{
+    type: DataTypes.JSON,
+    arrayOfNumbers: true,
+    allowNull: false,
+    validate: {
+      isArrayOfAllowedValues(value) {
+        if (!Array.isArray(value)) throw new Error('recipientsIds must be an array of Ids');
+      }
+    },
+  },
+}
+
+const newsletter = sequelize.define('newsletter', _schema, {
+  tableName: 'newsletters',
+  timestamps: true,
+  paranoid:true,
+});
+
+const base = z.object({
+  subject: z.string()
+    .min(1, "Subject is required")
+    .max(255, "Subject must be less than 255 characters"),
+    
+  content: z.string()
+    .min(1, "Content is required")
+    .min(10, "Content should be meaningful (at least 10 characters)"),
+    
+  createdBy: z.coerce.number()
+    .int("Created by must be an integer")
+    .positive("Created by must be positive")
+    .optional()
+    .nullable(),
+    
+  recipientsIds: z.array(
+      z.coerce.number().int("Recipient ID must be an integer").positive("Recipient ID must be positive")
+    )
+    .nonempty("At least one recipient ID is required")
+    .refine(ids => new Set(ids).size === ids.length, {
+      message: "Recipient IDs must be unique"
+    })
+});
+
+// Schema for COMPLETE records (including ID)
+const full = base.extend({
+  id: z.number().int().positive("test ID must be a positive integer")
+});
+ const updateSchema = base.partial();
+
+
+// create associations
+newsletter.associate = (models)=>{
+  newsletter.belongsTo(models.user, { foreignKey: 'createdBy', targetKey: 'id' });
+  // Recipients (many-to-many with newsletterSub)
+  newsletter.belongsToMany(models.newsletterSub, {
+    through: 'newsletter Recipients', // Junction table name
+    as: 'recipients', // Alias for eager loading (when populating)
+  });
+
+  // Successful Recipients
+  newsletter.belongsToMany(models.newsletterSub, {
+    through: 'newsletter Successful Recipients',
+    as: 'successfulRecipients', 
+  });
+
+  // Failed Recipients
+  newsletter.belongsToMany(models.newsletterSub, {
+    through: 'newsletter Failed Recipients',
+    as: 'failedRecipients',
+  });
+}
+
+
+newsletter.beforeFind('',function(options){
+  options.include = options.include || [];
+  options.include.push(
+    {
+    association: 'recipients', // Use the alias defined in your association
+    through: { attributes: [] }, // Exclude junction table fields
+    },
+    {
+      association: 'successfulRecipients', // Use the alias defined in your association
+      through: { attributes: [] }, // Exclude junction table fields
+    },
+    {
+      association: 'failedRecipients', // Use the alias defined in your association
+      through: { attributes: [] }, // Exclude junction table fields
+    },
+  );
+})
+
+const successfulRecipients = [];
+const failedRecipients = [];
+// pre save middler ware to send newsletter to subscribers
+newsletter.beforeCreate('', async function(model,options){
+  try {
+    // since the recipientsIds field is [ids] get the newsletterSub docs 
+    const { models } = sequelize;
+    const recipients = await models.newsletterSub.findAll({ where: { id: model.recipientsIds}});
+    const newsletter = model;
+    // --------------------------------------------------------------------------------//
+    const email_sending_errors = []
+    for (let i = 0; i < recipients.length; i++) {
+      const recipient = recipients[i];
+      if (!recipient.confirmed ) continue
+      // send the email inside trycatch block
+      try {
+        await new Email().sendNewsletter({
+            subject: newsletter.subject,
+            email: recipient.email,
+            name: recipient.name,
+            frontEnd: process.env.FRONTENDURL,
+            UnsubscribeLink: `${process.env.FRONTENDURL}/unsub/${recipient.id}`,
+            createdAt: newsletter.createdAt,
+            content: newsletter.content
+          })
+        successfulRecipients.push(recipient.id); 
+      } catch (error) { 
+        email_sending_errors.push(error) 
+        failedRecipients.push(recipient.id); 
+      }
+    }
+    
+    //----------------------------------------------------------------------------------------------------//
+    // if we have at least 1 sent email the newsletter must be saved 
+    if (email_sending_errors.length != 0 ) {
+          throw createError({
+            statusCode: 400,
+            statusMessage: `email_sending_errors: ${ JSON.stringify(email_sending_errors) }`
+          });
+    }
+  }
+  catch (error) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: error
+      });
+  }
+})
+
+// // make sure to create the recipients
+newsletter.afterCreate('', async function (model,options){ 
+  const uniqueSuccessful = [...new Set(successfulRecipients)];
+  const uniqueFailed = [...new Set(failedRecipients)];
+
+  await model.addRecipients(model.recipientsIds);
+  await model.addSuccessfulRecipients(uniqueSuccessful);
+  await model.addFailedRecipients(uniqueFailed);
+
+})
+
+export default {
+  model: newsletter,
+  schema : _schema,
+  zobSchema: {base,full,updateSchema}
+}
